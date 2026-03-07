@@ -1,4 +1,5 @@
 'use client'
+import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import Image from "next/image";
@@ -24,6 +25,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
+      <AppSidebar />
       <div className="flex gap-4">
         <SignInButton>
           <Button variant="outline" size="lg">
@@ -36,6 +38,7 @@ export default function Home() {
           </Button>
         </SignUpButton>
       </div>
+      
     </div>
   );
 }
