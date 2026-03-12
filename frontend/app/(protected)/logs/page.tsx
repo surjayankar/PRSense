@@ -1,3 +1,4 @@
+'use client'
 import { useAuthRedirect } from "@/app/hooks/use-auth-redirect";
 import { useEffect, useState } from "react";
 import { LogEntry, LogTable } from "./_components/log-table";

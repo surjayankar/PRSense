@@ -1,3 +1,4 @@
+'use client'
 import { useUsage } from "@/components/providers/usage-provider";
 import { useEffect, useState } from "react";
 import DashboardLoading from "./loading";

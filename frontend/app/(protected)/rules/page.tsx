@@ -1,3 +1,4 @@
+'use client'
 import { useAuthRedirect } from "@/app/hooks/use-auth-redirect";
 import { useUsage } from "@/components/providers/usage-provider";
 import { useEffect, useState } from "react";
@@ -26,7 +27,7 @@ export default function RulesPage() {
       const res = await fetch("/api/rules");
       if (!res.ok) throw new Error("Failed to fetch rules");
       const data = await res.json();
-      setRules(data.rules);
+      setRules(Array.isArray(data.rules) ? data.rules : []);
     } catch (err) {
       console.error("Error fetching rules:", err);
     } finally {
@@ -55,10 +56,10 @@ export default function RulesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.Error || "Failed to create rule");
+        setError(data.error || "Failed to create rule");
         return;
       }
-      setRules([data.rule, ...rules]);
+      setRules((prev) => [data.rule, ...prev]);
       setNewRule("");
     } catch (err) {
       setError("failed to create rule");
@@ -89,7 +90,7 @@ export default function RulesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("are you sure you wanna to delete this rule?")) return;
+    if (!confirm("Are you sure you wanna to delete this rule?")) return;
 
     try {
       const res = await fetch(`/api/rules/${id}`, {
@@ -126,8 +127,8 @@ export default function RulesPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Custom Rules</h1>
         <p className="text-muted-foreground">
-          Define rules in plain enlish. the ai will use these rules when
-          reviewing your shit
+          Define rules in plain enlish. The AI will use these rules when
+          reviewing your code
         </p>
       </div>
 

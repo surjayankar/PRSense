@@ -1,3 +1,4 @@
+'use client'
 import { useAuthRedirect } from "@/app/hooks/use-auth-redirect";
 import { useUsage } from "@/components/providers/usage-provider";
 import { useUser } from "@clerk/nextjs";
