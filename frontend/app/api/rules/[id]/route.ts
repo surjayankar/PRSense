@@ -14,7 +14,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const content = await req.json()
+    const {content} = await req.json()
 
     const rule = await updateRule(id, content)
 

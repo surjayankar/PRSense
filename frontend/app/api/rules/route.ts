@@ -19,7 +19,7 @@ export async function GET() {
         );
     }
 
-    const rules = getRulesByUserId(user.id);
+    const rules =await getRulesByUserId(user.id);
 
     return NextResponse.json({ rules });
   } catch (error) {
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     const rule = await createRule(user.id, content);
+    return NextResponse.json({ rule });
   } catch (error) {
     return NextResponse.json(
       { error: "internal server used" },

@@ -1,3 +1,4 @@
+import { upsertRepository } from "../data/repositories";
 import { prisma } from "../prisma";
 
 export async function handleInstallationCreated(payload: any) {
@@ -79,7 +80,7 @@ export async function handlePullRequestOpened(payload: any) {
     if (isAutoPR) {
       const updatesUser = await prisma.user.update({
         where: {
-          id: installation.id,
+          id: installation.userId,
         },
         data: {
           prsCreated: {
