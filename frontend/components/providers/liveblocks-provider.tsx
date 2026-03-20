@@ -15,7 +15,7 @@ export function LiveblocksWrapper({ children }: { children: ReactNode }) {
           body: JSON.stringify({ userIds }),
         });
         if (response.ok) {
-          const users = await response.json();
+          const {users} = await response.json();
           return users;
         }
       }}

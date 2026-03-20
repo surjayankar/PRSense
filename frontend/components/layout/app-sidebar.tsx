@@ -55,7 +55,7 @@ export function AppSidebar() {
               </>
             ) : (
               <>
-                <p className="font-semibold">CodeRabbit</p>
+                <p className="font-semibold">PRSense</p>
                 <p className="text-xs text-muted-foreground">AI Code Reviews</p>
               </>
             )}

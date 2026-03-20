@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { LiveblocksWrapper } from "@/components/providers/liveblocks-provider";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,11 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LiveblocksWrapper>{children}</LiveblocksWrapper>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <LiveblocksWrapper>{children}</LiveblocksWrapper>
+          </ThemeProvider>
         
       </body>
     </html>

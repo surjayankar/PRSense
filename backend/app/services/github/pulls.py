@@ -14,11 +14,7 @@ async def get_pr_diff(owner, repo, pr_number, token):
 
 
 async def get_pr_files(owner, repo, pr_number, token):
-    resp = await github_request(
-        "GET",
-        f"/repos/{owner}/{repo}/pulls/{pr_number}",
-        token,
-    )
+    resp = await github_request("GET", f"/repos/{owner}/{repo}/pulls/{pr_number}/files", token)
     files = resp.json()
     filenames = [f["filename"] for f in files]
     return filenames

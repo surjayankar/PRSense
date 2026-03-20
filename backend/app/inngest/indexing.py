@@ -9,6 +9,9 @@ from app.services.frontend import update_indexing_status
 
 import hashlib, uuid
 
+def make_chunk_id(repo, path, start_line, end_line):
+    key = f"{repo}:{path}:{start_line}:{end_line}"
+    return str(uuid.UUID(hashlib.md5(key.encode()).hexdigest()))
 
 @inngest_client.create_function(
     fn_id="handle_installation",
@@ -29,9 +32,7 @@ async def handle_installation(ctx: inngest.Context):
     all_points = []
     
 
-def make_chunk_id(repo, path, start_line, end_line):
-    key = f"{repo}:{path}:{start_line}:{end_line}"
-    return str(uuid.UUID(hashlib.md5(key.encode()).hexdigest()))
+
 
     for file in files:
         file_path = file["path"]
