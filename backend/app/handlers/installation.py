@@ -8,7 +8,7 @@ async def handle_installation(payload):
     account = payload["installation"]["account"]["login"]
     repositories = payload.get("repositories", [])
 
-    repo_name = repositories[0]["name"]
+    repo_name = repositories[0]["name"] if repositories else ""
     await inngest_client.send(
         inngest.Event(
             name="installation/created",

@@ -1,4 +1,4 @@
-import { updateRule } from "@/lib/data/rules";
+import { deleteRule, updateRule } from "@/lib/data/rules";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -25,4 +25,14 @@ export async function PUT(
       { status: 500 },
     )
   }
+}
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id } = await params;
+  await deleteRule(id);  
+  return NextResponse.json({ ok: true });
 }
