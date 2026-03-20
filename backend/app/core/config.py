@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     qdrant_url: str = ""
     qdrant_api_key: str = ""
 
-    llm_model: str = "gpt-5.2"
+    llm_model: str = "gpt-4o-mini"
 
     environment: str = "development"
     frontend_url: str = "http://localhost:3000"

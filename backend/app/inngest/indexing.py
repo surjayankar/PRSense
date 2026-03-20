@@ -7,6 +7,8 @@ from app.services import embeddings, github, vectordb
 from app.services.chunker import chunk_code, create_chunk_text_for_embedding
 from app.services.frontend import update_indexing_status
 
+import hashlib, uuid
+
 
 @inngest_client.create_function(
     fn_id="handle_installation",
@@ -25,6 +27,11 @@ async def handle_installation(ctx: inngest.Context):
     files = await github.get_repo_files(account, repo_name, token)
 
     all_points = []
+    
+
+def make_chunk_id(repo, path, start_line, end_line):
+    key = f"{repo}:{path}:{start_line}:{end_line}"
+    return str(uuid.UUID(hashlib.md5(key.encode()).hexdigest()))
 
     for file in files:
         file_path = file["path"]

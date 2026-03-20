@@ -18,6 +18,7 @@ class CodeChunk:
 
 def get_language(file_path):
     filename = file_path.split("/")[-1]
+
     if filename in EXTENSION_TO_LANGUAGE:
         return EXTENSION_TO_LANGUAGE[filename]
 
@@ -32,18 +33,19 @@ def get_language(file_path):
 def get_node_name(node, code):
     name_node = node.child_by_field_name("name")
     if name_node:
-        return code[name_node.start_byte : name_node.end_byte]
+        return code[name_node.start_byte: name_node.end_byte]
 
     return None
 
 
 def get_node_code(node, code):
-    return code[node.start_byte : node.end_byte]
+    return code[node.start_byte: node.end_byte]
 
 
 def chunk_code(code, file_path):
     language = get_language(file_path)
 
+    # Fallback: unknown language
     if not language:
         return [
             CodeChunk(
@@ -57,11 +59,12 @@ def chunk_code(code, file_path):
             )
         ]
 
+    # Parse using tree-sitter
     try:
         lang = LANGUAGES.get(language)
         parser = Parser(lang)
-        tree = parser.parse(code.encode("uts-8"))
-    except Exception as e:
+        tree = parser.parse(code.encode("utf-8"))  # ✅ fixed encoding
+    except Exception:
         return [
             CodeChunk(
                 content=code,
@@ -80,9 +83,8 @@ def chunk_code(code, file_path):
     chunks = []
 
     def walk_tree(node):
-
         if node.type in function_types:
-            chunks.append[
+            chunks.append(  # ✅ fixed ()
                 CodeChunk(
                     content=get_node_code(node, code),
                     chunk_type="function",
@@ -92,9 +94,10 @@ def chunk_code(code, file_path):
                     end_line=node.end_point[0] + 1,
                     language=language,
                 )
-            ]
+            )
+
         elif node.type in class_types:
-            chunks.append[
+            chunks.append(  # ✅ fixed ()
                 CodeChunk(
                     content=get_node_code(node, code),
                     chunk_type="class",
@@ -104,32 +107,36 @@ def chunk_code(code, file_path):
                     end_line=node.end_point[0] + 1,
                     language=language,
                 )
-            ]
+            )
+
         for child in node.children:
             walk_tree(child)
 
-        walk_tree(tree.root_node)
+    # ✅ moved outside function
+    walk_tree(tree.root_node)
 
-        if not chunks:
-            chunks.append[
-                CodeChunk(
-                    content=code,
-                    chunk_type="file",
-                    name=file_path.split("/")[-1],
-                    file_path=file_path,
-                    start_line=1,
-                    end_line=code.count("\n") + 1,
-                    language=language,
-                )
-            ]
+    # ✅ fallback if nothing found
+    if not chunks:
+        chunks.append(
+            CodeChunk(
+                content=code,
+                chunk_type="file",
+                name=file_path.split("/")[-1],
+                file_path=file_path,
+                start_line=1,
+                end_line=code.count("\n") + 1,
+                language=language,
+            )
+        )
 
-        return chunks
+    return chunks
 
 
 def create_chunk_text_for_embedding(chunk):
     lines = []
 
     lines.append(f"File: {chunk.file_path}")
+
     if chunk.name:
         lines.append(f"{chunk.chunk_type.capitalize()}: {chunk.name}")
 

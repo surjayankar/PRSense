@@ -25,7 +25,7 @@ export const POST = Webhooks({
         polarCustomerId: customer_id,
       },
       data: {
-        plan: "PRO",
+        plan: "FREE",
         polarSubscriptionId: null,
       },
     });

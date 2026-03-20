@@ -45,7 +45,7 @@ async def handle_issue(payload):
             desc_embeddings, limit=5, repo=repo_full_name
         )
 
-        for point in title_results:
+        for point in desc_results:
             payload_data = point.payload
             path = payload_data.get("path", "")
             if path and path not in seen_paths:

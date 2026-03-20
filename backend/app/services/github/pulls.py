@@ -6,7 +6,7 @@ from app.services.github.client import github_request
 async def get_pr_diff(owner, repo, pr_number, token):
     resp = await github_request(
         "GET",
-        f"/repos/{owner}/pulls/{pr_number}",
+        f"/repos/{owner}/{repo}/pulls/{pr_number}",
         token,
         accept="application/vnd.github.v3.diff",
     )
@@ -16,7 +16,7 @@ async def get_pr_diff(owner, repo, pr_number, token):
 async def get_pr_files(owner, repo, pr_number, token):
     resp = await github_request(
         "GET",
-        f"/repos/{owner}/pulls/{pr_number}/files",
+        f"/repos/{owner}/{repo}/pulls/{pr_number}",
         token,
     )
     files = resp.json()
@@ -37,7 +37,7 @@ async def post_comment(owner, repo, issue_number, comment, token):
 async def create_branch(owner, repo, branch_name, from_ref, token):
     resp = await github_request(
         "GET",
-        f"/repos/{owner}/{repo}/git/ref/heads{from_ref}",
+        f"/repos/{owner}/{repo}/git/refs/heads/{from_ref}",
         token,
     )
     sha = resp.json()["object"]["sha"]
@@ -60,7 +60,7 @@ async def create_or_update_file(
         "branch": branch,
     }
     resp = await github_request(
-        "PUT", f"/repo{owner}/{repo}/contents/{path}", token, json=body
+        "PUT", f"/repos/{owner}/{repo}/contents/{path}", token, json=body
     )
     return resp.json()
 

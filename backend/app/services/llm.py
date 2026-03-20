@@ -113,7 +113,7 @@ async def chat_with_repo(question, code_context):
     return result
 
 
-async def plan_issues_fix(
+async def plan_issue_fix(
     issue_title, issue_body, related_code, file_contents, custom_rules
 ):
 
@@ -175,7 +175,6 @@ async def plan_issues_fix(
             model=MODEL, messages=[{"role": "user", "content": prompt}], temperature=0.2
         )
         result = response.choices[0].message.content
-        return result
         plan = json.loads(result)
         return plan
 
