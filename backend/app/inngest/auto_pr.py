@@ -40,7 +40,6 @@ async def handle_auto_pr(ctx: inngest.Context):
             header = f"File: {path}"
             if name:
                 header += f" | {chunk_type}: {name}"
-
             related_code += f"\n-- {header} ---\n{content}\n"
 
     file_contents = {}
@@ -73,6 +72,8 @@ async def handle_auto_pr(ctx: inngest.Context):
             file_data = await github.get_file_content(
                 owner, repo_name, file_path, token
             )
+            current_content = file_data["content"]
+            file_shas[file_path] = file_data["sha"]
 
         new_content = await llm.generate_file_change(
             file_path=file_path,
@@ -94,7 +95,6 @@ async def handle_auto_pr(ctx: inngest.Context):
         )
 
     branch_name = f"PRSense/issue-{issue_number}"
-
     default_branch = await github.get_default_branch(owner, repo_name, token)
     await github.create_branch(owner, repo_name, branch_name, default_branch, token)
 
@@ -104,15 +104,21 @@ async def handle_auto_pr(ctx: inngest.Context):
                 owner,
                 repo_name,
                 change["path"],
-                f"Delete {change[f'path']} for #{issue_number}",
+                f"chore: delete {change['path']} for issue #{issue_number}",
                 branch_name,
                 change["sha"],
                 token,
             )
         else:
             await github.create_or_update_file(
-                owner, repo_name, change["path"], change["content"],
-                f"...", branch_name, token, change.get("sha"),
+                owner,
+                repo_name,
+                change["path"],
+                change["content"],
+                f"chore: update {change['path']} for issue #{issue_number}",
+                branch_name,
+                token,
+                change.get("sha"),
             )
 
     pr_body = f"""## Summary

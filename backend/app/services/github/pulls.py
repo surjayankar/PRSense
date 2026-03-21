@@ -14,10 +14,11 @@ async def get_pr_diff(owner, repo, pr_number, token):
 
 
 async def get_pr_files(owner, repo, pr_number, token):
-    resp = await github_request("GET", f"/repos/{owner}/{repo}/pulls/{pr_number}/files", token)
+    resp = await github_request(
+        "GET", f"/repos/{owner}/{repo}/pulls/{pr_number}/files", token
+    )
     files = resp.json()
-    filenames = [f["filename"] for f in files]
-    return filenames
+    return [f["filename"] for f in files]
 
 
 async def post_comment(owner, repo, issue_number, comment, token):
@@ -48,27 +49,31 @@ async def create_branch(owner, repo, branch_name, from_ref, token):
 
 
 async def create_or_update_file(
-    owner, repo, path, content, message, branch, token, sha
+    owner, repo, path, content, message, branch, token, sha=None
 ):
     body = {
         "message": message,
         "content": base64.b64encode(content.encode("utf-8")).decode("utf-8"),
         "branch": branch,
     }
+    # sha is required by GitHub API when updating an existing file
+    if sha:
+        body["sha"] = sha
+
     resp = await github_request(
         "PUT", f"/repos/{owner}/{repo}/contents/{path}", token, json=body
     )
     return resp.json()
 
 
-async def delete_file(owner, repo, path, message, branch, token, sha):
+async def delete_file(owner, repo, path, message, branch, sha, token):
+    """sha and token order matches call sites in auto_pr.py"""
     resp = await github_request(
         "DELETE",
         f"/repos/{owner}/{repo}/contents/{path}",
         token,
         json={"message": message, "sha": sha, "branch": branch},
     )
-
     return resp.json()
 
 

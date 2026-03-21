@@ -1,4 +1,5 @@
 import hashlib
+import uuid
 
 import inngest
 
@@ -7,11 +8,11 @@ from app.services import embeddings, github, vectordb
 from app.services.chunker import chunk_code, create_chunk_text_for_embedding
 from app.services.frontend import update_indexing_status
 
-import hashlib, uuid
 
 def make_chunk_id(repo, path, start_line, end_line):
     key = f"{repo}:{path}:{start_line}:{end_line}"
     return str(uuid.UUID(hashlib.md5(key.encode()).hexdigest()))
+
 
 @inngest_client.create_function(
     fn_id="handle_installation",
@@ -26,13 +27,9 @@ async def handle_installation(ctx: inngest.Context):
     await update_indexing_status(repo_full_name, "INDEXING")
 
     token = await github.get_installation_token(installation_id)
-
     files = await github.get_repo_files(account, repo_name, token)
 
     all_points = []
-    
-
-
 
     for file in files:
         file_path = file["path"]
@@ -55,7 +52,7 @@ async def handle_installation(ctx: inngest.Context):
                     "repo": repo_full_name,
                     "path": chunk.file_path,
                     "content": chunk.content,
-                    "chunk_type": chunk.name,
+                    "chunk_type": chunk.chunk_type,
                     "name": chunk.name,
                     "language": chunk.language,
                     "start_line": chunk.start_line,
@@ -66,5 +63,4 @@ async def handle_installation(ctx: inngest.Context):
             all_points.append(point)
 
     vectordb.upsert_embeddings(all_points)
-
     await update_indexing_status(repo_full_name, "COMPLETED")

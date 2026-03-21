@@ -1,11 +1,12 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 from app.core.config import settings
 
-client = OpenAI(api_key=settings.openai_api_key)
+client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 async def create_embedding(text):
-    response = client.embeddings.create(input=text, model="text-embedding-3-small")
-    embedding = response.data[0].embedding
-    return embedding
+    response = await client.embeddings.create(
+        input=text, model="text-embedding-3-small"
+    )
+    return response.data[0].embedding

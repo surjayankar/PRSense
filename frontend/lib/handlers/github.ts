@@ -7,21 +7,15 @@ export async function handleInstallationCreated(payload: any) {
     const accountLogin = payload.installation.account.login;
     const repositories = payload.repositories || [];
 
-    const exsistingInstallation = await prisma.installation.findUnique({
-      where: {
-        installationId,
-      },
+    const existingInstallation = await prisma.installation.findUnique({
+      where: { installationId },
     });
 
-    if (exsistingInstallation) {
-      if (exsistingInstallation.accountLogin === "pending") {
+    if (existingInstallation) {
+      if (existingInstallation.accountLogin === "pending") {
         await prisma.installation.update({
-          where: {
-            id: exsistingInstallation.id,
-          },
-          data: {
-            accountLogin,
-          },
+          where: { id: existingInstallation.id },
+          data: { accountLogin },
         });
       }
 
@@ -30,12 +24,12 @@ export async function handleInstallationCreated(payload: any) {
           repo.id,
           repo.name,
           repo.full_name,
-          exsistingInstallation.id,
+          existingInstallation.id,
         );
       }
     }
   } catch (error) {
-    console.log(error);
+    console.error("handleInstallationCreated error:", error);
   }
 }
 
@@ -46,64 +40,44 @@ export async function handlePullRequestOpened(payload: any) {
     const repo = payload.repository;
 
     const installation = await prisma.installation.findUnique({
-      where: {
-        installationId,
-      },
-      include: {
-        user: true,
-      },
+      where: { installationId },
+      include: { user: true },
     });
+
     if (!installation) {
       console.error("Installation not found:", installationId);
       return;
     }
 
-    const repository = await upsertRepository(
+    // Upsert the repo so it exists in our DB before the backend logs the review
+    await upsertRepository(
       repo.id,
       repo.name,
       repo.full_name,
       installation.id,
     );
 
-    await prisma.pullRequest.create({
-      data: {
-        githubId: pr.id,
-        number: pr.number,
-        title: pr.title,
-        repositoryId: repository.id,
-      },
-    });
-
-    const headBranch = pr.head.ref || "";
+    // Determine whether this is an auto-generated PRSense PR
+    const headBranch: string = pr.head?.ref || "";
     const isAutoPR = headBranch.startsWith("PRSense/");
 
+    // Increment usage counters only — PR record is created by logPrReview/logPrCreation
+    // after the AI finishes, avoiding duplicate rows.
     if (isAutoPR) {
-      const updatesUser = await prisma.user.update({
-        where: {
-          id: installation.userId,
-        },
+      await prisma.user.update({
+        where: { id: installation.userId },
         data: {
-          prsCreated: {
-            increment: 1,
-          },
-          prsUsed: {
-            increment: 1,
-          },
+          prsCreated: { increment: 1 },
+          prsUsed: { increment: 1 },
         },
       });
     } else {
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: installation.userId,
-        },
-        data: {
-          prsUsed: {
-            increment: 1,
-          },
-        },
+      await prisma.user.update({
+        where: { id: installation.userId },
+        data: { prsUsed: { increment: 1 } },
       });
     }
   } catch (error) {
-    console.error(error);
+    console.error("handlePullRequestOpened error:", error);
   }
 }
